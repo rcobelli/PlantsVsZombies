@@ -917,16 +917,19 @@ typedef struct {
  int height;
  int width;
  int active;
+ int frame;
+ int frameCounter;
 } SEED;
-# 53 "game.h"
-extern PLANT plants[25];
-extern ZOMBIE enemies[25];
-extern BULLET bullets[25];
-extern SEED seeds[3];
+# 55 "game.h"
+extern PLANT plants[24];
+extern ZOMBIE enemies[24];
+extern BULLET bullets[24];
+extern SEED seeds[24];
 
 extern int enemiesRemaining;
 extern int enemiesThisLevel;
 extern int enemySpawnCooldown;
+extern int enemySpawnCountdown;
 extern int zombieReachedHouse;
 
 extern int seedsCollection;
@@ -940,10 +943,13 @@ void initGame();
 void drawGame();
 void updateGame();
 
+void nextLevel();
+
 void initPlants();
 void updatePlant(int, PLANT*);
 void spawnPlant();
 void lockPlant();
+void upgradePlant();
 
 void initBullets();
 void updateBullet(int, BULLET*);
@@ -960,21 +966,23 @@ void collectSeeds();
 # 4 "game.c" 2
 
 
-PLANT plants[25];
-BULLET bullets[25];
-ZOMBIE enemies[25];
-SEED seeds[3];
+PLANT plants[24];
+BULLET bullets[24];
+ZOMBIE enemies[24];
+SEED seeds[24];
 int enemiesRemaining;
 int enemiesThisLevel;
 int enemySpawnCooldown;
+int enemySpawnCountdown;
 int zombieReachedHouse;
 
 int seedsCollection;
 
 int currentPlant;
+int spawnCoord;
 
 int currentLevel;
-# 30 "game.c"
+# 39 "game.c"
 void initGame() {
 
  initPlants();
@@ -985,41 +993,75 @@ void initGame() {
  currentPlant = -1;
  zombieReachedHouse = 0;
 
-
  currentLevel = 0;
- enemiesThisLevel = 10;
- enemiesRemaining = enemiesThisLevel;
- enemySpawnCooldown = 200;
+ nextLevel();
+
+ seedsCollection = 1;
+
+ spawnCoord = 20;
+
+
+ shadowOAM[101].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[101].attr1 = (240 - 15) | (1<<14);
+ shadowOAM[101].attr2 = ((2)*32+(30));
+
+ shadowOAM[102].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[102].attr1 = (240 - 30) | (1<<14);
+ shadowOAM[102].attr2 = ((30)*32+(0));
+
+
+ shadowOAM[103].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[103].attr1 = (240 - 75) | (1<<14);
+ shadowOAM[103].attr2 = ((2)*32+(30));
+
+ shadowOAM[104].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[104].attr1 = (240 - 90) | (1<<14);
+ shadowOAM[104].attr2 = ((30)*32+(2));
+
+
+
+ shadowOAM[105].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[105].attr1 = (240 - 135) | (1<<14);
+ shadowOAM[105].attr2 = ((2)*32+(30));
+
+ shadowOAM[106].attr0 = (160 - 20) | (0<<14) | (0<<8);
+ shadowOAM[106].attr1 = (240 - 150) | (1<<14);
+ shadowOAM[106].attr2 = ((30)*32+(4));
 }
 
 
 void updateGame() {
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   updateZombie(i, &enemies[i]);
  }
 
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   updateBullet(i, &bullets[i]);
  }
 
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 24; i++) {
   updatePlant(i, &plants[i]);
  }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 24; i++) {
   updateSeed(i, &seeds[i]);
  }
 
- if (enemiesRemaining > 0 && enemySpawnCooldown <= 0) {
+ if (enemiesRemaining > 0 && enemySpawnCountdown <= 0) {
   spawnZombie(currentLevel);
-  enemySpawnCooldown = 200;
+  enemySpawnCountdown = enemySpawnCooldown;
  } else {
-  enemySpawnCooldown--;
+  enemySpawnCountdown--;
  }
 
- if (enemiesRemaining == 0) {
-  collectSeeds();
- }
+
+ shadowOAM[101].attr2 = ((currentLevel * 2)*32+(30));
+
+
+ shadowOAM[103].attr2 = ((seedsCollection * 2)*32+(30));
+
+
+ shadowOAM[105].attr2 = ((enemiesRemaining * 2)*32+(30));
 }
 
 
@@ -1027,9 +1069,29 @@ void drawGame() {
  DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
 }
 
+void nextLevel() {
+ currentLevel++;
+
+ if (currentLevel == 1) {
+  enemiesThisLevel = 5;
+  enemySpawnCooldown = 200;
+ } else if (currentLevel == 2) {
+  enemiesThisLevel = 8;
+  enemySpawnCooldown = 180;
+ } else if (currentLevel == 3) {
+  enemiesThisLevel = 11;
+  enemySpawnCooldown = 160;
+ }
+
+ enemiesRemaining = enemiesThisLevel;
+ enemySpawnCountdown = enemySpawnCooldown;
+
+ collectSeeds();
+}
+
 
 void initPlants() {
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   PLANT p = {
    .height = 16,
    .width = 16,
@@ -1037,14 +1099,15 @@ void initPlants() {
    .frame = 0,
    .placed = 0,
    .frameCounter = 0,
-            .shootCooldown = 0
+            .shootCooldown = 0,
+   .level = 0
   };
 
   plants[i] = p;
 
         shadowOAM[1 + i].attr0 = (2<<8);
   shadowOAM[1 + i].attr1 = (1<<14);
-  shadowOAM[1 + i].attr2 = ((0)*32+(0));
+  shadowOAM[1 + i].attr2 = ((5)*32+(0));
  }
 }
 
@@ -1053,48 +1116,54 @@ void updatePlant(int i, PLANT* p) {
     if (!p->active) {
   shadowOAM[1 + i].attr0 = (2<<8);
  } else {
-  if (p->frameCounter == 20) {
-   p->frameCounter = 0;
-   if (p->frame == 2) {
-    p->frame = 0;
-   } else {
-    p->frame++;
-   }
-
-   shadowOAM[1 + i].attr2 = ((0)*32+(0));
-  } else {
-   p->frameCounter++;
-  }
-
-
-   shadowOAM[1 + i].attr0 = p->row | (0<<14) | (0<<8);
-   shadowOAM[1 + i].attr1 = p->col | (1<<14);
-
   if (p->placed) {
-   if (p->shootCooldown >= 100) {
+   if (p->shootCooldown >= (100 - (p->level * 15))) {
     p->shootCooldown = 0;
-    fireBullet(p->col, p->row);
+    fireBullet(p->col, ((p->row * 24) + 2));
    } else {
     p->shootCooldown++;
    }
+
+   if (p->frameCounter == 20) {
+    p->frameCounter = 0;
+    if (p->frame == 3) {
+     p->frame = 0;
+    } else {
+     p->frame++;
+    }
+
+    shadowOAM[1 + i].attr2 = ((p->frame * 2)*32+(p->level * 2));
+   } else {
+    p->frameCounter++;
+   }
+  } else {
+   shadowOAM[1 + i].attr2 = ((8)*32+(p->level * 2));
   }
+
+  shadowOAM[1 + i].attr0 = ((p->row * 24) + 2) | (0<<14) | (0<<8);
+  shadowOAM[1 + i].attr1 = p->col | (1<<14);
  }
 }
 
 void spawnPlant() {
+ if (seedsCollection > 0) {
+  seedsCollection--;
 
- for (int i = 0; i < 25; i++) {
-  if (!plants[i].active) {
+  for (int i = 0; i < 24; i++) {
+   if (!plants[i].active) {
 
-   plants[i].row = 16;
-   plants[i].col = 16;
+    plants[i].row = 0;
+    plants[i].col = spawnCoord;
 
-   plants[i].active = 1;
+    spawnCoord += 3;
 
-   currentPlant = i;
+    plants[i].active = 1;
+
+    currentPlant = i;
 
 
-   break;
+    break;
+   }
   }
  }
 }
@@ -1104,9 +1173,27 @@ void lockPlant() {
  currentPlant = -1;
 }
 
+void upgradePlant() {
+ if (plants[currentPlant].level == 0) {
+
+  if (seedsCollection > 3) {
+   seedsCollection -= 3;
+   plants[currentPlant].level++;
+  }
+ } else if (plants[currentPlant].level == 1) {
+
+  if (seedsCollection > 3) {
+   seedsCollection -= 3;
+   plants[currentPlant].level++;
+  }
+ } else {
+
+ }
+}
+
 
 void initBullets() {
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   BULLET b = {
    .height = 4,
    .width = 2,
@@ -1119,7 +1206,7 @@ void initBullets() {
 
   shadowOAM[51 + i].attr0 = (2<<8);
   shadowOAM[51 + i].attr1 = (0<<14);
-  shadowOAM[51 + i].attr2 = ((0)*32+(4));
+  shadowOAM[51 + i].attr2 = ((0)*32+(8));
  }
 }
 
@@ -1134,8 +1221,7 @@ void updateBullet(int i, BULLET* b) {
 
 
 
-
-  for (int i = 0; i < 25; i++) {
+  for (int i = 0; i < 24; i++) {
    if (enemies[i].active) {
 
     if (collision(enemies[i].col, enemies[i].row, enemies[i].width, enemies[i].height, b->col, b->row, b->width, b->height)) {
@@ -1157,7 +1243,7 @@ void updateBullet(int i, BULLET* b) {
 
 void fireBullet(int x, int y) {
 
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 24; i++) {
         if (!bullets[i].active) {
 
             bullets[i].row = y + 7;
@@ -1179,7 +1265,7 @@ void fireBullet(int x, int y) {
 
 
 void initZombies() {
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   ZOMBIE z = {
    .height = 16,
    .width = 16,
@@ -1193,7 +1279,7 @@ void initZombies() {
 
         shadowOAM[26 + i].attr0 = (2<<8);
   shadowOAM[26 + i].attr1 = (1<<14);
-  shadowOAM[26 + i].attr2 = ((0)*32+(2));
+  shadowOAM[26 + i].attr2 = ((0)*32+(6));
  }
 }
 
@@ -1202,7 +1288,29 @@ void updateZombie(int i, ZOMBIE* z) {
  if (!z->active) {
   shadowOAM[26 + i].attr0 = (2<<8);
  } else {
-# 269 "game.c"
+  if (z->frameCounter == 20) {
+   z->frameCounter = 0;
+   if (z->frame == 3) {
+    z->frame = 0;
+   } else {
+    z->frame++;
+   }
+
+   shadowOAM[26 + i].attr2 = ((z->frame * 2)*32+(6));
+  } else {
+   z->frameCounter++;
+  }
+
+
+  for (int i = 0; i < 24; i++) {
+   if (plants[i].active) {
+
+    if (collision(plants[i].col, plants[i].row, plants[i].width, plants[i].height, z->col, z->row, z->width, z->height)) {
+     plants[i].active = 0;
+    }
+   }
+  }
+
   if (z->col <= 4) {
    zombieReachedHouse = 1;
   }
@@ -1220,11 +1328,11 @@ void updateZombie(int i, ZOMBIE* z) {
 
 void spawnZombie(int rows) {
 
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   if (!enemies[i].active) {
 
    enemies[i].col = 240;
-   enemies[i].row = ((rand() % rows) * 16) + 3;
+   enemies[i].row = ((rand() % (rows % 6)) * 20) + 3;
 
    shadowOAM[26 + i].attr0 = enemies[i].row | (0<<8) | (0<<14);
    shadowOAM[26 + i].attr1 = enemies[i].col | (1<<14);
@@ -1241,18 +1349,20 @@ void spawnZombie(int rows) {
 
 
 void initSeeds() {
- for (int i = 0; i < 3; i++) {
+ for (int i = 0; i < 24; i++) {
   SEED s = {
    .height = 16,
    .width = 16,
-   .active = 0
+   .active = 0,
+   .frame = 0,
+   .frameCounter = 0,
   };
 
   seeds[i] = s;
 
         shadowOAM[76 + i].attr0 = (2<<8);
   shadowOAM[76 + i].attr1 = (1<<14);
-  shadowOAM[76 + i].attr2 = ((0)*32+(6));
+  shadowOAM[76 + i].attr2 = ((0)*32+(10));
  }
 }
 
@@ -1260,13 +1370,26 @@ void initSeeds() {
 void updateSeed(int i, SEED* s) {
  if (!s->active) {
   shadowOAM[76 + i].attr0 = (2<<8);
+ } else {
+  if (s->frameCounter == 20) {
+   s->frameCounter = 0;
+   if (s->frame == 3) {
+    s->frame = 0;
+   } else {
+    s->frame++;
+   }
+
+   shadowOAM[76 + i].attr2 = ((s->frame * 2)*32+(10));
+  } else {
+   s->frameCounter++;
+  }
  }
 }
 
 
 void dropSeed(int x, int y) {
 
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   if (!seeds[i].active) {
 
    seeds[i].row = y - 8;
@@ -1286,14 +1409,11 @@ void dropSeed(int x, int y) {
 
 void collectSeeds() {
 
- for (int i = 0; i < 25; i++) {
+ for (int i = 0; i < 24; i++) {
   if (seeds[i].active) {
    seeds[i].active = 0;
 
    seedsCollection++;
-
-
-   break;
   }
  }
 }

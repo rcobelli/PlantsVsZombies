@@ -8,18 +8,19 @@
 	.eabi_attribute 30, 2
 	.eabi_attribute 34, 0
 	.eabi_attribute 18, 4
-	.file	"gameBG.c"
-	.global	gameBGPal
-	.global	gameBGMap
-	.global	gameBGTiles
+	.file	"bg.c"
+	.global	bgPal
+	.global	bgMap
+	.global	bgTiles
 	.section	.rodata
 	.align	2
-	.type	gameBGPal, %object
-	.size	gameBGPal, 512
-gameBGPal:
+	.type	bgPal, %object
+	.size	bgPal, 512
+bgPal:
 	.short	0
 	.short	25368
-	.short	992
+	.short	11232
+	.short	32767
 	.short	0
 	.short	0
 	.short	0
@@ -272,10 +273,9 @@ gameBGPal:
 	.short	0
 	.short	0
 	.short	0
-	.short	0
-	.type	gameBGMap, %object
-	.size	gameBGMap, 2048
-gameBGMap:
+	.type	bgMap, %object
+	.size	bgMap, 2048
+bgMap:
 	.short	0
 	.short	1
 	.short	1
@@ -820,100 +820,103 @@ gameBGMap:
 	.short	1
 	.short	0
 	.short	0
+	.short	4
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
+	.short	5
 	.short	0
-	.short	2050
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
-	.short	2051
 	.short	0
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
 	.short	0
 	.short	0
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
+	.short	6
 	.short	0
 	.short	0
 	.short	0
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
-	.short	1
 	.short	0
 	.short	0
 	.short	0
@@ -1297,12 +1300,9 @@ gameBGMap:
 	.short	0
 	.short	0
 	.short	0
-	.short	0
-	.short	0
-	.short	0
-	.type	gameBGTiles, %object
-	.size	gameBGTiles, 128
-gameBGTiles:
+	.type	bgTiles, %object
+	.size	bgTiles, 224
+bgTiles:
 	.short	0
 	.short	0
 	.short	0
@@ -1367,4 +1367,52 @@ gameBGTiles:
 	.short	8738
 	.short	8738
 	.short	8738
+	.short	0
+	.short	0
+	.short	0
+	.short	0
+	.short	0
+	.short	0
+	.short	4369
+	.short	4369
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	8738
+	.short	8738
+	.short	8738
+	.short	8738
+	.short	8738
+	.short	8738
+	.short	4369
+	.short	4369
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
+	.short	13107
 	.ident	"GCC: (devkitARM release 47) 7.1.0"

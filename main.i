@@ -1319,16 +1319,19 @@ typedef struct {
  int height;
  int width;
  int active;
+ int frame;
+ int frameCounter;
 } SEED;
-# 53 "game.h"
-extern PLANT plants[25];
-extern ZOMBIE enemies[25];
-extern BULLET bullets[25];
-extern SEED seeds[3];
+# 55 "game.h"
+extern PLANT plants[24];
+extern ZOMBIE enemies[24];
+extern BULLET bullets[24];
+extern SEED seeds[24];
 
 extern int enemiesRemaining;
 extern int enemiesThisLevel;
 extern int enemySpawnCooldown;
+extern int enemySpawnCountdown;
 extern int zombieReachedHouse;
 
 extern int seedsCollection;
@@ -1342,10 +1345,13 @@ void initGame();
 void drawGame();
 void updateGame();
 
+void nextLevel();
+
 void initPlants();
 void updatePlant(int, PLANT*);
 void spawnPlant();
 void lockPlant();
+void upgradePlant();
 
 void initBullets();
 void updateBullet(int, BULLET*);
@@ -1401,15 +1407,15 @@ extern const unsigned short loseMap[1024];
 
 extern const unsigned short losePal[256];
 # 11 "main.c" 2
-# 1 "gameBG.h" 1
-# 22 "gameBG.h"
-extern const unsigned short gameBGTiles[64];
+# 1 "bg.h" 1
+# 22 "bg.h"
+extern const unsigned short bgTiles[112];
 
 
-extern const unsigned short gameBGMap[1024];
+extern const unsigned short bgMap[1024];
 
 
-extern const unsigned short gameBGPal[256];
+extern const unsigned short bgPal[256];
 # 12 "main.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
@@ -1428,8 +1434,7 @@ extern const unsigned short instructionsMap[1024];
 
 extern const unsigned short instructionsPal[256];
 # 14 "main.c" 2
-
-
+# 57 "main.c"
 void initialize();
 
 
@@ -1510,7 +1515,6 @@ void goToStart() {
     (*(unsigned short *)0x4000000) = 0 | (1<<9);
 
 
-
     (*(volatile unsigned short*)0x400000A) = (0<<14) | ((0)<<2) | ((16)<<8);
     DMANow(3, splashPal, ((unsigned short *)0x5000000), 512/2);
     DMANow(3, splashTiles, &((charblock *)0x6000000)[0], 768/2);
@@ -1574,9 +1578,9 @@ void goToGame() {
     DMANow(3, spritesheetTiles, &((charblock *)0x6000000)[4], 32768/2);
 
 
-    DMANow(3, gameBGPal, ((unsigned short *)0x5000000), 512/2);
-    DMANow(3, gameBGTiles, &((charblock *)0x6000000)[0], 128/2);
-    DMANow(3, gameBGMap, &((screenblock *)0x6000000)[16], 2048/2);
+    DMANow(3, bgPal, ((unsigned short *)0x5000000), 512/2);
+    DMANow(3, bgTiles, &((charblock *)0x6000000)[0], 224/2);
+    DMANow(3, bgMap, &((screenblock *)0x6000000)[16], 2048/2);
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((16)<<8) | (0<<14);
 
     state = GAME;
@@ -1591,28 +1595,33 @@ void game() {
     waitForVBlank();
 
 
-    if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
-        lockPlant();
-    }
-    else if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
+    if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
         goToPause();
     }
     else if ((!(~(oldButtons)&((1<<0))) && (~buttons & ((1<<0))))) {
         if (currentPlant == -1) {
             spawnPlant();
+        } else {
+            lockPlant();
         }
     }
     else if ((!(~(oldButtons)&((1<<1))) && (~buttons & ((1<<1))))) {
-        goToLose();
-    }
-    else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<6)))) {
         if (currentPlant != -1) {
-            plants[currentPlant].row--;
+            upgradePlant();
         }
     }
-    else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<7)))) {
+    else if ((!(~(oldButtons)&((1<<6))) && (~buttons & ((1<<6))))) {
         if (currentPlant != -1) {
-            plants[currentPlant].row++;
+            if (plants[currentPlant].row > 0) {
+                plants[currentPlant].row--;
+            }
+        }
+    }
+    else if ((!(~(oldButtons)&((1<<7))) && (~buttons & ((1<<7))))) {
+        if (currentPlant != -1) {
+            if (plants[currentPlant].row < 5) {
+                plants[currentPlant].row++;
+            }
         }
     }
     else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<5)))) {
@@ -1625,8 +1634,11 @@ void game() {
             plants[currentPlant].col++;
         }
     }
-    else if (enemiesRemaining == 0) {
+    else if (currentLevel > 3) {
         goToWin();
+    }
+    else if (enemiesRemaining == 0) {
+        nextLevel();
     }
     else if (zombieReachedHouse) {
         goToLose();

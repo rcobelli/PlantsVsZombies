@@ -220,7 +220,7 @@ goToGame:
 	mov	r0, #3
 	mov	lr, pc
 	bx	r4
-	mov	r3, #64
+	mov	r3, #112
 	mov	r2, #100663296
 	ldr	r1, .L25+24
 	mov	r0, #3
@@ -247,10 +247,10 @@ goToGame:
 	.word	spritesheetPal
 	.word	100728832
 	.word	spritesheetTiles
-	.word	gameBGPal
-	.word	gameBGTiles
+	.word	bgPal
+	.word	bgTiles
 	.word	100696064
-	.word	gameBGMap
+	.word	bgMap
 	.word	state
 	.size	goToGame, .-goToGame
 	.align	2
@@ -553,159 +553,169 @@ game:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
-	ldr	r3, .L116
+	ldr	r3, .L124
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L116+4
+	ldr	r3, .L124+4
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L116+8
+	ldr	r3, .L124+8
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L116+12
+	ldr	r3, .L124+12
 	ldrh	r3, [r3]
-	tst	r3, #8
-	beq	.L75
-	ldr	r2, .L116+16
-	ldrh	r2, [r2]
-	tst	r2, #8
-	beq	.L111
-.L75:
 	tst	r3, #4
-	beq	.L77
-	ldr	r2, .L116+16
+	beq	.L75
+	ldr	r2, .L124+16
 	ldrh	r2, [r2]
 	tst	r2, #4
-	beq	.L112
-.L77:
+	beq	.L120
+.L75:
 	tst	r3, #1
-	beq	.L78
-	ldr	r2, .L116+16
+	beq	.L76
+	ldr	r2, .L124+16
 	ldrh	r2, [r2]
 	tst	r2, #1
-	bne	.L78
-	ldr	r3, .L116+20
+	bne	.L76
+	ldr	r3, .L124+20
 	ldr	r3, [r3]
 	cmn	r3, #1
-	beq	.L113
+	ldreq	r3, .L124+24
+	ldrne	r3, .L124+28
+	mov	lr, pc
+	bx	r3
 .L74:
 	pop	{r4, lr}
 	bx	lr
-.L78:
+.L76:
 	tst	r3, #2
-	bne	.L114
+	bne	.L121
 .L79:
-	ldr	r3, .L116+24
-	ldrh	r2, [r3, #48]
+	tst	r3, #64
+	beq	.L80
+	ldr	r2, .L124+16
+	ldrh	r2, [r2]
 	tst	r2, #64
 	bne	.L80
-	ldr	r3, .L116+20
+	ldr	r3, .L124+20
 	ldr	r3, [r3]
 	cmn	r3, #1
 	beq	.L74
-	ldr	r1, .L116+28
 	add	r3, r3, r3, lsl #2
+	ldr	r1, .L124+32
 	lsl	r3, r3, #3
 	ldr	r2, [r1, r3]
-	sub	r2, r2, #1
-	str	r2, [r1, r3]
-	pop	{r4, lr}
-	bx	lr
-.L114:
-	ldr	r3, .L116+16
-	ldrh	r3, [r3]
-	tst	r3, #2
-	bne	.L79
-.L85:
-	pop	{r4, lr}
-	b	goToLose
-.L80:
-	ldrh	r2, [r3, #48]
-	tst	r2, #128
-	bne	.L81
-	ldr	r3, .L116+20
-	ldr	r3, [r3]
-	cmn	r3, #1
-	beq	.L74
-	ldr	r1, .L116+28
-	add	r3, r3, r3, lsl #2
-	lsl	r3, r3, #3
-	ldr	r2, [r1, r3]
-	add	r2, r2, #1
-	str	r2, [r1, r3]
+	cmp	r2, #0
+	subgt	r2, r2, #1
+	strgt	r2, [r1, r3]
 	b	.L74
-.L111:
-	ldr	r3, .L116+32
+.L121:
+	ldr	r2, .L124+16
+	ldrh	r2, [r2]
+	tst	r2, #2
+	bne	.L79
+	ldr	r3, .L124+20
+	ldr	r3, [r3]
+	cmn	r3, #1
+	beq	.L74
+	ldr	r3, .L124+36
 	mov	lr, pc
 	bx	r3
-	pop	{r4, lr}
-	bx	lr
-.L112:
-	pop	{r4, lr}
-	b	goToPause
+	b	.L74
+.L80:
+	tst	r3, #128
+	beq	.L81
+	ldr	r3, .L124+16
+	ldrh	r3, [r3]
+	tst	r3, #128
+	bne	.L81
+	ldr	r3, .L124+20
+	ldr	r3, [r3]
+	cmn	r3, #1
+	beq	.L74
+	ldr	r1, .L124+32
+	add	r3, r3, r3, lsl #2
+	lsl	r3, r3, #3
+	ldr	r2, [r1, r3]
+	cmp	r2, #4
+	addle	r2, r2, #1
+	strle	r2, [r1, r3]
+	b	.L74
 .L81:
+	ldr	r3, .L124+40
 	ldrh	r2, [r3, #48]
 	tst	r2, #32
 	bne	.L82
-	ldr	r3, .L116+20
+	ldr	r3, .L124+20
 	ldr	r3, [r3]
 	cmn	r3, #1
 	beq	.L74
-	ldr	r2, .L116+28
+	ldr	r2, .L124+32
 	add	r3, r3, r3, lsl #2
 	add	r3, r2, r3, lsl #3
 	ldr	r2, [r3, #4]
 	sub	r2, r2, #1
 	str	r2, [r3, #4]
 	b	.L74
+.L120:
+	pop	{r4, lr}
+	b	goToPause
 .L82:
 	ldrh	r3, [r3, #48]
 	tst	r3, #16
 	bne	.L83
-	ldr	r3, .L116+20
+	ldr	r3, .L124+20
 	ldr	r3, [r3]
 	cmn	r3, #1
 	beq	.L74
-	ldr	r2, .L116+28
+	ldr	r2, .L124+32
 	add	r3, r3, r3, lsl #2
 	add	r3, r2, r3, lsl #3
 	ldr	r2, [r3, #4]
 	add	r2, r2, #1
 	str	r2, [r3, #4]
 	b	.L74
-.L113:
-	ldr	r3, .L116+36
-	mov	lr, pc
-	bx	r3
-	b	.L74
 .L83:
-	ldr	r3, .L116+40
+	ldr	r3, .L124+44
+	ldr	r3, [r3]
+	cmp	r3, #3
+	bgt	.L122
+	ldr	r3, .L124+48
 	ldr	r3, [r3]
 	cmp	r3, #0
-	beq	.L115
-	ldr	r3, .L116+44
+	beq	.L123
+	ldr	r3, .L124+52
 	ldr	r3, [r3]
 	cmp	r3, #0
 	beq	.L74
-	b	.L85
-.L115:
+	pop	{r4, lr}
+	b	goToLose
+.L122:
 	pop	{r4, lr}
 	b	goToWin
-.L117:
+.L123:
+	ldr	r3, .L124+56
+	mov	lr, pc
+	bx	r3
+	b	.L74
+.L125:
 	.align	2
-.L116:
+.L124:
 	.word	updateGame
 	.word	drawGame
 	.word	waitForVBlank
 	.word	oldButtons
 	.word	buttons
 	.word	currentPlant
-	.word	67109120
-	.word	plants
-	.word	lockPlant
 	.word	spawnPlant
+	.word	lockPlant
+	.word	plants
+	.word	upgradePlant
+	.word	67109120
+	.word	currentLevel
 	.word	enemiesRemaining
 	.word	zombieReachedHouse
+	.word	nextLevel
 	.size	game, .-game
 	.section	.text.startup,"ax",%progbits
 	.align	2
@@ -720,21 +730,21 @@ main:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r7, fp, lr}
-	ldr	r3, .L131
+	ldr	r3, .L139
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L131+4
+	ldr	r3, .L139+4
 	mov	lr, pc
 	bx	r3
-	ldr	fp, .L131+8
-	ldr	r5, .L131+12
-	ldr	r10, .L131+16
-	ldr	r9, .L131+20
-	ldr	r8, .L131+24
-	ldr	r7, .L131+28
-	ldr	r6, .L131+32
-	ldr	r4, .L131+36
-.L119:
+	ldr	fp, .L139+8
+	ldr	r5, .L139+12
+	ldr	r10, .L139+16
+	ldr	r9, .L139+20
+	ldr	r8, .L139+24
+	ldr	r7, .L139+28
+	ldr	r6, .L139+32
+	ldr	r4, .L139+36
+.L127:
 	ldrh	r2, [fp]
 	strh	r2, [r5]	@ movhi
 	ldr	r3, [r10]
@@ -742,40 +752,40 @@ main:
 	strh	r1, [fp]	@ movhi
 	cmp	r3, #5
 	ldrls	pc, [pc, r3, asl #2]
-	b	.L119
-.L122:
-	.word	.L121
-	.word	.L123
-	.word	.L124
-	.word	.L125
-	.word	.L126
-	.word	.L126
-.L126:
+	b	.L127
+.L130:
+	.word	.L129
+	.word	.L131
+	.word	.L132
+	.word	.L133
+	.word	.L134
+	.word	.L134
+.L134:
 	mov	lr, pc
 	bx	r6
-	b	.L119
-.L125:
+	b	.L127
+.L133:
 	mov	lr, pc
 	bx	r7
-	b	.L119
-.L124:
+	b	.L127
+.L132:
 	tst	r2, #8
-	beq	.L119
-	ldr	r3, .L131+40
+	beq	.L127
+	ldr	r3, .L139+40
 	mov	lr, pc
 	bx	r3
-	b	.L119
-.L123:
+	b	.L127
+.L131:
 	mov	lr, pc
 	bx	r8
-	b	.L119
-.L121:
+	b	.L127
+.L129:
 	mov	lr, pc
 	bx	r9
-	b	.L119
-.L132:
+	b	.L127
+.L140:
 	.align	2
-.L131:
+.L139:
 	.word	hideSprites
 	.word	goToStart
 	.word	buttons

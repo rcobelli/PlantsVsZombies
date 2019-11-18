@@ -8,9 +8,50 @@
 #include "splash.h"
 #include "win.h"
 #include "lose.h"
-#include "gameBG.h"
+#include "bg.h"
 #include "spritesheet.h"
 #include "instructions.h"
+
+/*
+Oligatory Comment Box
+
+Finished:
+  - Core gameplay mechanics
+  - Upgrading plants
+  - Multiple levels
+  - State machine
+
+Todo:
+  - Balance the game (actually make it fun)
+  - Provide in-game instructions
+  - Artwork
+  - Implement levels 3-10(+)
+  - Sound
+
+Instructions:
+
+The goal of the game is to place plants in the way of zombies to shoot them (as they move from right to left).
+Level 1 only uses the top row and each subsequent level uses an additional row
+If a zombie reaches the left side of the screen, you lose
+If you beat level 3, you win (for now)
+
+Use START to navigate from the splash screen to instructions
+Use START to navigate from instructions to game play
+While in game:
+    Press A to spawn a new plant (assuming you have at least 1 seed available)
+        Use arrows to move it around
+        Press A again to place it (it won't fire until it's been placed)
+        You can tell if it's been placed by artwork
+        Press B before placing it to upgrade it (this will consume more seeds)
+            There are only 3 levels
+            Levels are distinguished by color (for now)
+            Higher levels = less shooting cooldown time
+    Press SELECT to pause the game
+While paused:
+    Press START to resume
+    Press SELECT to start over
+
+*/
 
 // Prototypes
 void initialize();
@@ -93,7 +134,6 @@ void goToStart() {
     REG_DISPCTL = MODE0 | BG1_ENABLE;
 
     // Set BG1 to be the splash screen
-    // TODO
     REG_BG1CNT = BG_SIZE_SMALL | BG_CHARBLOCK(0) | BG_SCREENBLOCK(16);
     DMANow(3, splashPal, PALETTE, splashPalLen/2);
     DMANow(3, splashTiles, &CHARBLOCK[0], splashTilesLen/2);
@@ -157,9 +197,9 @@ void goToGame() {
     DMANow(3, spritesheetTiles, &CHARBLOCK[4], spritesheetTilesLen/2);
 
     // Load the game BG into BG 0
-    DMANow(3, gameBGPal, PALETTE, gameBGPalLen/2);
-    DMANow(3, gameBGTiles, &CHARBLOCK[0], gameBGTilesLen/2);
-    DMANow(3, gameBGMap, &SCREENBLOCK[16], gameBGMapLen/2);
+    DMANow(3, bgPal, PALETTE, bgPalLen/2);
+    DMANow(3, bgTiles, &CHARBLOCK[0], bgTilesLen/2);
+    DMANow(3, bgMap, &SCREENBLOCK[16], bgMapLen/2);
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(16) | BG_SIZE_SMALL;
 
     state = GAME;
@@ -174,28 +214,33 @@ void game() {
     waitForVBlank();
 
     // State transition logic
-    if (BUTTON_PRESSED(BUTTON_START)) {
-        lockPlant();
-    }
-    else if (BUTTON_PRESSED(BUTTON_SELECT)) {
+    if (BUTTON_PRESSED(BUTTON_SELECT)) {
         goToPause();
     }
     else if (BUTTON_PRESSED(BUTTON_A)) {
         if (currentPlant == -1) {
             spawnPlant();
+        } else {
+            lockPlant();
         }
     }
     else if (BUTTON_PRESSED(BUTTON_B)) {
-        goToLose();
-    }
-    else if (BUTTON_HELD(BUTTON_UP)) {
         if (currentPlant != -1) {
-            plants[currentPlant].row--;
+            upgradePlant();
         }
     }
-    else if (BUTTON_HELD(BUTTON_DOWN)) {
+    else if (BUTTON_PRESSED(BUTTON_UP)) {
         if (currentPlant != -1) {
-            plants[currentPlant].row++;
+            if (plants[currentPlant].row > 0) {
+                plants[currentPlant].row--;
+            }
+        }
+    }
+    else if (BUTTON_PRESSED(BUTTON_DOWN)) {
+        if (currentPlant != -1) {
+            if (plants[currentPlant].row < 5) {
+                plants[currentPlant].row++;
+            }
         }
     }
     else if (BUTTON_HELD(BUTTON_LEFT)) {
@@ -208,8 +253,11 @@ void game() {
             plants[currentPlant].col++;
         }
     }
-    else if (enemiesRemaining == 0) {
+    else if (currentLevel > 3) {
         goToWin();
+    }
+    else if (enemiesRemaining == 0) {
+        nextLevel();
     }
     else if (zombieReachedHouse) {
         goToLose();

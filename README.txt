@@ -6,14 +6,15 @@ While in game:
     Press SELECT to move to the pause/store screen 
     Press A to spawn a new plant
         Use the arrow keys to move it around
-        Press START to place it (it won't fire until placed)
-    Press B to immediately lose
+        Press A to place it (it won't fire until placed)
+        Press B to upgrade it (the more upgraded the plant, the less time it takes to fire)
+            You can tell what level the plant is based off the color
 While paused:
     Press SELECT to move to the splash screen
     Press START to return to the game
 From the win/lose screen, press START to move to the splash screen
 
-The final game will have multiple levels, but I currently only have the game playing a single level (if you beat level 1, you win)
+The final game will have 10+ levels, but I currently only have the game playing through 3 levels
 Level 1 has 10 zombies (red boxes) come through the top row (every level allows the zombies to use an additional row).
 You lose by allowing a zombie to reach the house (the box on the left edge of the screen)
 

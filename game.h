@@ -41,13 +41,15 @@ typedef struct {
 	int height;
 	int width;
 	int active;
+	int frame;
+	int frameCounter;
 } SEED;
 
 // Constants
-#define ENEMYCOUNT 25
-#define BULLETCOUNT 25
-#define PLANTCOUNT 25
-#define SEEDCOUNT 3
+#define ENEMYCOUNT 24
+#define BULLETCOUNT 24
+#define PLANTCOUNT 24
+#define SEEDCOUNT 24
 
 // Variables
 extern PLANT plants[PLANTCOUNT];
@@ -58,6 +60,7 @@ extern SEED seeds[SEEDCOUNT];
 extern int enemiesRemaining;
 extern int enemiesThisLevel;
 extern int enemySpawnCooldown;
+extern int enemySpawnCountdown;
 extern int zombieReachedHouse;
 
 extern int seedsCollection;
@@ -71,10 +74,13 @@ void initGame();
 void drawGame();
 void updateGame();
 
+void nextLevel();
+
 void initPlants();
 void updatePlant(int, PLANT*);
 void spawnPlant();
 void lockPlant();
+void upgradePlant();
 
 void initBullets();
 void updateBullet(int, BULLET*);
