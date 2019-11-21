@@ -127,13 +127,34 @@ void nextLevel() {
 
 	if (currentLevel == 1) {
 		enemiesThisLevel = 5;
-		enemySpawnCooldown = 200;
+		enemySpawnCooldown = 100;
 	} else if (currentLevel == 2) {
 		enemiesThisLevel = 8;
-		enemySpawnCooldown = 180;
+		enemySpawnCooldown = 90;
 	} else if (currentLevel == 3) {
 		enemiesThisLevel = 11;
-		enemySpawnCooldown = 160;
+		enemySpawnCooldown = 80;
+	} else if (currentLevel == 4) {
+		enemiesThisLevel = 14;
+		enemySpawnCooldown = 70;
+	} else if (currentLevel == 5) {
+		enemiesThisLevel = 17;
+		enemySpawnCooldown = 60;
+	} else if (currentLevel == 6) {
+		enemiesThisLevel = 20;
+		enemySpawnCooldown = 50;
+	} else if (currentLevel == 7) {
+		enemiesThisLevel = 23;
+		enemySpawnCooldown = 40;
+	} else if (currentLevel == 8) {
+		enemiesThisLevel = 26;
+		enemySpawnCooldown = 30;
+	} else if (currentLevel == 9) {
+		enemiesThisLevel = 29;
+		enemySpawnCooldown = 20;
+	} else if (currentLevel == 10) {
+		enemiesThisLevel = 32;
+		enemySpawnCooldown = 10;
 	}
 	
 	enemiesRemaining = enemiesThisLevel;
@@ -170,7 +191,7 @@ void updatePlant(int i, PLANT* p) {
 		shadowOAM[1 + i].attr0 = ATTR0_HIDE;
 	} else {
 		if (p->placed) {
-			if (p->shootCooldown >= (100 - (p->level * 15))) {
+			if (p->shootCooldown >= (125 - (p->level * 15))) {
 				p->shootCooldown = 0;
 				fireBullet(p->col, ((p->row * 24) + 2));
 			} else {
@@ -281,7 +302,9 @@ void updateBullet(int i, BULLET* b) {
 					b->active = 0;
 					enemies[i].active = 0;
 					enemiesRemaining--;
-					dropSeed(b->col, b->row);
+					if (rand() % 2 == 0) {
+						dropSeed(b->col, b->row);
+					}
 				}
 			}
 		}
@@ -385,8 +408,8 @@ void spawnZombie(int rows) {
 		if (!enemies[i].active) {
 			// Position the new zombie
 			enemies[i].col = SCREENWIDTH;
-			enemies[i].row = ((rand() % (rows % 6)) * 20) + 3;
-
+			enemies[i].row = (((rand() % (rows % 6)) * 24) + 2);
+			
 			shadowOAM[26 + i].attr0 = enemies[i].row | ATTR0_REGULAR | ATTR0_SQUARE;
 			shadowOAM[26 + i].attr1 = enemies[i].col | ATTR1_SMALL;
 

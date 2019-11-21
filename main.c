@@ -20,12 +20,12 @@ Finished:
   - Upgrading plants
   - Multiple levels
   - State machine
+  - Implement levels 3-10(+)
 
 Todo:
   - Balance the game (actually make it fun)
   - Provide in-game instructions
   - Artwork
-  - Implement levels 3-10(+)
   - Sound
 
 Instructions:
@@ -33,7 +33,7 @@ Instructions:
 The goal of the game is to place plants in the way of zombies to shoot them (as they move from right to left).
 Level 1 only uses the top row and each subsequent level uses an additional row
 If a zombie reaches the left side of the screen, you lose
-If you beat level 3, you win (for now)
+If you beat level 10, you win
 
 Use START to navigate from the splash screen to instructions
 Use START to navigate from instructions to game play
@@ -244,16 +244,16 @@ void game() {
         }
     }
     else if (BUTTON_HELD(BUTTON_LEFT)) {
-        if (currentPlant != -1) {
+        if (currentPlant != -1 && plants[currentPlant].col > 4) {
             plants[currentPlant].col--;
         }
     }
     else if (BUTTON_HELD(BUTTON_RIGHT)) {
-        if (currentPlant != -1) {
+        if (currentPlant != -1 && plants[currentPlant].col < SCREENWIDTH - plants[currentPlant].width) {
             plants[currentPlant].col++;
         }
     }
-    else if (currentLevel > 3) {
+    else if (currentLevel > 10) {
         goToWin();
     }
     else if (enemiesRemaining == 0) {
