@@ -408,7 +408,7 @@ void updateZombie(int i, ZOMBIE* z) {
 		for (int i = 0; i < PLANTCOUNT; i++) {
 			if (plants[i].active) {
 				// Check if the plant and enemy have collided
-				if (collision(plants[i].col, plants[i].row, plants[i].width, plants[i].height, z->col, z->row, z->width, z->height)) {
+				if (collision(plants[i].col, ((plants[i].row * 24) + 2), plants[i].width, plants[i].height, z->col, z->row, z->width, z->height)) {
 					plants[i].active = 0;
 					z->cdel = -1;
 				}

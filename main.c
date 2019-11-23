@@ -19,18 +19,23 @@
 /*
 Oligatory Comment Box
 
+READ ME: The splash screen is implemented moving two different backgrounds moving at different speeds (although this 
+    isn't controlled by the user). Does this satisfy the requirement?
+
 Finished:
   - Core gameplay mechanics
   - Upgrading plants
   - Multiple levels
   - State machine
   - Implement levels 3-10(+)
-
-Todo:
   - Balance the game (actually make it fun)
   - Provide in-game instructions
   - Artwork
   - Sound
+
+Todo:
+  - Improve zombie sprite/animation
+  - Add cheat
 
 Instructions:
 
