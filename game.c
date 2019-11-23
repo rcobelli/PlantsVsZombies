@@ -2,6 +2,9 @@
 #include "myLib.h"
 #include "game.h"
 
+#include "error.h"
+#include "sound.h"
+
 // Variables
 PLANT plants[PLANTCOUNT];
 BULLET bullets[BULLETCOUNT];
@@ -27,13 +30,16 @@ int currentLevel;
 // 26 through 50    = Zombies
 // 51 through 75    = Bullets
 // 76 through 100  	= Seeds
-// 101 				= Level Counter
-// 102				= Level Label
-// 103 				= Seeds Counter
-// 104				= Seeds Label
-// 105				= Enemies Counter
-// 106				= Enemies Label
-// 101 through 127  = Misc
+// 101 				= Level Counter 1
+// 102				= Level Counter 2
+// 103				= Level Label
+// 104 				= Seeds Counter 1
+// 105				= Seeds Counter 2
+// 106				= Seeds Label
+// 107				= Enemies Counter 1
+// 108				= Enemies Counter 2
+// 109				= Enemies Label
+// 110 through 127  = Unused
 
 // Initialize the game
 void initGame() {
@@ -54,32 +60,43 @@ void initGame() {
 	spawnCoord = 20;
 
 	// Setup level sprites
-	shadowOAM[101].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[101].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
 	shadowOAM[101].attr1 = (SCREENWIDTH - 15) | ATTR1_SMALL;
 	shadowOAM[101].attr2 = ATTR2_TILEID(30, 2);
 
-	shadowOAM[102].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
-	shadowOAM[102].attr1 = (SCREENWIDTH - 30) | ATTR1_SMALL;
+	shadowOAM[102].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[102].attr1 = (SCREENWIDTH - 25) | ATTR1_SMALL;
 	shadowOAM[102].attr2 = ATTR2_TILEID(0, 30);
 
-	// Setup seeds sprites
 	shadowOAM[103].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
-	shadowOAM[103].attr1 = (SCREENWIDTH - 75) | ATTR1_SMALL;
-	shadowOAM[103].attr2 = ATTR2_TILEID(30, 2);
+	shadowOAM[103].attr1 = (SCREENWIDTH - 45) | ATTR1_SMALL;
+	shadowOAM[103].attr2 = ATTR2_TILEID(0, 30);
 
-	shadowOAM[104].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
+	// Setup seeds sprites
+	shadowOAM[104].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
 	shadowOAM[104].attr1 = (SCREENWIDTH - 90) | ATTR1_SMALL;
-	shadowOAM[104].attr2 = ATTR2_TILEID(2, 30);
+	shadowOAM[104].attr2 = ATTR2_TILEID(30, 2);
 
-
-	// Setup enemies sprites
-	shadowOAM[105].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
-	shadowOAM[105].attr1 = (SCREENWIDTH - 135) | ATTR1_SMALL;
-	shadowOAM[105].attr2 = ATTR2_TILEID(30, 2);
+	shadowOAM[105].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[105].attr1 = (SCREENWIDTH - 100) | ATTR1_SMALL;
+	shadowOAM[105].attr2 = ATTR2_TILEID(2, 30);
 
 	shadowOAM[106].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
-	shadowOAM[106].attr1 = (SCREENWIDTH - 150) | ATTR1_SMALL;
-	shadowOAM[106].attr2 = ATTR2_TILEID(4, 30);
+	shadowOAM[106].attr1 = (SCREENWIDTH - 120) | ATTR1_SMALL;
+	shadowOAM[106].attr2 = ATTR2_TILEID(2, 30);
+
+	// Setup enemies sprites
+	shadowOAM[107].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[107].attr1 = (SCREENWIDTH - 165) | ATTR1_SMALL;
+	shadowOAM[107].attr2 = ATTR2_TILEID(30, 2);
+
+	shadowOAM[108].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[108].attr1 = (SCREENWIDTH - 175) | ATTR1_SMALL;
+	shadowOAM[108].attr2 = ATTR2_TILEID(4, 30);
+
+	shadowOAM[109].attr0 = (SCREENHEIGHT - 20) | ATTR0_SQUARE | ATTR0_REGULAR;
+	shadowOAM[109].attr1 = (SCREENWIDTH - 195) | ATTR1_SMALL;
+	shadowOAM[109].attr2 = ATTR2_TILEID(4, 30);
 }
 
 // Updates the game each frame
@@ -108,13 +125,16 @@ void updateGame() {
 	}
 
 	// Update level sprite
-	shadowOAM[101].attr2 = ATTR2_TILEID(30, currentLevel * 2);
+	shadowOAM[101].attr2 = ATTR2_TILEID(30, (currentLevel % 10) * 2);
+	shadowOAM[102].attr2 = ATTR2_TILEID(30, (currentLevel / 10) * 2);
 
 	// Update seed sprite
-	shadowOAM[103].attr2 = ATTR2_TILEID(30, seedsCollection * 2);
+	shadowOAM[104].attr2 = ATTR2_TILEID(30, (seedsCollection % 10) * 2);
+	shadowOAM[105].attr2 = ATTR2_TILEID(30, (seedsCollection / 10) * 2);
 
 	// Update enemy sprite
-	shadowOAM[105].attr2 = ATTR2_TILEID(30, enemiesRemaining * 2);
+	shadowOAM[107].attr2 = ATTR2_TILEID(30, (enemiesRemaining % 10) * 2);
+	shadowOAM[108].attr2 = ATTR2_TILEID(30, (enemiesRemaining / 10) * 2);
 }
 
 // Draws the game each frame
@@ -191,7 +211,7 @@ void updatePlant(int i, PLANT* p) {
 		shadowOAM[1 + i].attr0 = ATTR0_HIDE;
 	} else {
 		if (p->placed) {
-			if (p->shootCooldown >= (125 - (p->level * 15))) {
+			if (p->shootCooldown >= (100 - (p->level * 15))) {
 				p->shootCooldown = 0;
 				fireBullet(p->col, ((p->row * 24) + 2));
 			} else {
@@ -239,6 +259,8 @@ void spawnPlant() {
 				break;
 			}
 		}
+	} else {
+   		playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 	}
 }
 
@@ -253,15 +275,20 @@ void upgradePlant() {
 		if (seedsCollection > 3) {
 			seedsCollection -= 3;
 			plants[currentPlant].level++;
+		} else {
+   			playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 		}
 	} else if (plants[currentPlant].level == 1) {
 		// Upgrade to level 2
 		if (seedsCollection > 3) {
 			seedsCollection -= 3;
 			plants[currentPlant].level++;
+		} else {
+   			playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 		}
 	} else {
-		// TODO: Play error sound
+		// Play error sound
+   		playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 	}
 }
 
@@ -322,7 +349,7 @@ void fireBullet(int x, int y) {
     for (int i = 0; i < BULLETCOUNT; i++) {
         if (!bullets[i].active) {
             // Position the new bullet
-            bullets[i].row = y + 7;
+            bullets[i].row = y + 2;
             bullets[i].col = x + 16 - bullets[i].width/2;
 
             bullets[i].cdel = 2;
@@ -348,7 +375,7 @@ void initZombies() {
 			.active = 0,
 			.frame = 0,
 			.frameCounter = i % 20,
-            .cdel = -1
+            .cdel = -2
 		};
 		
 		enemies[i] = z;
@@ -383,6 +410,7 @@ void updateZombie(int i, ZOMBIE* z) {
 				// Check if the plant and enemy have collided
 				if (collision(plants[i].col, plants[i].row, plants[i].width, plants[i].height, z->col, z->row, z->width, z->height)) {
 					plants[i].active = 0;
+					z->cdel = -1;
 				}
 			}
 		}
@@ -408,6 +436,7 @@ void spawnZombie(int rows) {
 		if (!enemies[i].active) {
 			// Position the new zombie
 			enemies[i].col = SCREENWIDTH;
+			enemies[i].cdel = -2;
 			enemies[i].row = (((rand() % (rows % 6)) * 24) + 2);
 			
 			shadowOAM[26 + i].attr0 = enemies[i].row | ATTR0_REGULAR | ATTR0_SQUARE;

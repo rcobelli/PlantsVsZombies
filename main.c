@@ -5,12 +5,16 @@
 #include "game.h"
 
 #include "pause.h"
-#include "splash.h"
+#include "splashFront.h"
+#include "splashBack.h"
 #include "win.h"
 #include "lose.h"
 #include "bg.h"
 #include "spritesheet.h"
 #include "instructions.h"
+
+#include "sound.h"
+#include "bgMusic.h"
 
 /*
 Oligatory Comment Box
@@ -84,6 +88,9 @@ int numGenSeed;
 // Text Buffer
 char buffer[41];
 
+// Horizontal Offset
+unsigned short hOff;
+
 int main() {
 
     initialize();
@@ -131,13 +138,17 @@ void initialize() {
 
 // Sets up the start state
 void goToStart() {
-    REG_DISPCTL = MODE0 | BG1_ENABLE;
+    REG_DISPCTL = MODE0 | BG2_ENABLE | BG1_ENABLE;
 
     // Set BG1 to be the splash screen
-    REG_BG1CNT = BG_SIZE_SMALL | BG_CHARBLOCK(0) | BG_SCREENBLOCK(16);
-    DMANow(3, splashPal, PALETTE, splashPalLen/2);
-    DMANow(3, splashTiles, &CHARBLOCK[0], splashTilesLen/2);
-    DMANow(3, splashMap, &SCREENBLOCK[16], splashMapLen/2);
+    REG_BG2CNT = BG_SIZE_SMALL | BG_CHARBLOCK(0) | BG_SCREENBLOCK(16);
+    DMANow(3, splashBackPal, PALETTE, splashBackPalLen/2);
+    DMANow(3, splashBackTiles, &CHARBLOCK[0], splashBackTilesLen/2);
+    DMANow(3, splashBackMap, &SCREENBLOCK[16], splashBackMapLen/2);
+
+    REG_BG1CNT = BG_SIZE_SMALL | BG_CHARBLOCK(1) | BG_SCREENBLOCK(18);
+    DMANow(3, splashFrontTiles, &CHARBLOCK[1], splashFrontTilesLen/2);
+    DMANow(3, splashFrontMap, &SCREENBLOCK[18], splashFrontMapLen/2);
 
     waitForVBlank();
 
@@ -145,6 +156,10 @@ void goToStart() {
 
     // Begin the seed randomization
     numGenSeed = 0;
+
+    // Setup sound
+    setupSounds();
+    setupInterrupts();
 }
 
 // Runs every frame of the start state
@@ -157,12 +172,13 @@ void start() {
 
     // State transitions
     if (BUTTON_PRESSED(BUTTON_START)) {
-
         // Seed the random generator
         srand(numGenSeed);
 
         goToInstructions();
     }
+
+    REG_BG0HOFF = (hOff++) * 0.5;
 }
 
 void goToInstructions() {
@@ -182,7 +198,7 @@ void goToInstructions() {
 void instructions() {
     // State transitions
     if (BUTTON_PRESSED(BUTTON_START)) {
-
+        playSoundA(bgMusic, BGMUSICLEN, BGMUSICFREQ, 1);
         goToGame();
         initGame();
     }
@@ -190,6 +206,8 @@ void instructions() {
 
 // Sets up the game state
 void goToGame() {
+    REG_BG0HOFF = 0;
+
     REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
 
     // Load the sprite palette
@@ -198,9 +216,9 @@ void goToGame() {
 
     // Load the game BG into BG 0
     DMANow(3, bgPal, PALETTE, bgPalLen/2);
-    DMANow(3, bgTiles, &CHARBLOCK[0], bgTilesLen/2);
-    DMANow(3, bgMap, &SCREENBLOCK[16], bgMapLen/2);
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(16) | BG_SIZE_SMALL;
+    DMANow(3, bgTiles, &CHARBLOCK[1], bgTilesLen/2);
+    DMANow(3, bgMap, &SCREENBLOCK[20], bgMapLen/2);
+    REG_BG0CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(20) | BG_SIZE_SMALL;
 
     state = GAME;
 }
@@ -215,6 +233,7 @@ void game() {
 
     // State transition logic
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
+        pauseSound();
         goToPause();
     }
     else if (BUTTON_PRESSED(BUTTON_A)) {
@@ -254,12 +273,14 @@ void game() {
         }
     }
     else if (currentLevel > 10) {
+        stopSound();
         goToWin();
     }
     else if (enemiesRemaining == 0) {
         nextLevel();
     }
     else if (zombieReachedHouse) {
+        stopSound();
         goToLose();
     }
 }
@@ -286,10 +307,13 @@ void pause() {
     waitForVBlank();
 
     // State transitions
-    if (BUTTON_PRESSED(BUTTON_START))
+    if (BUTTON_PRESSED(BUTTON_START)) {
+        unpauseSound();
         goToGame();
-    else if (BUTTON_PRESSED(BUTTON_SELECT))
+    }
+    else if (BUTTON_PRESSED(BUTTON_SELECT)) {
         goToStart();
+    }
 }
 
 // Sets up the win state
