@@ -1,22 +1,23 @@
-At this point in time, I haven't implemented the full instructions screen (I have the state in place but the content is missing), so for now: this file exists
+The goal of the game is to place plants in the way of zombies to shoot them (as they move from right to left).
+Level 1 only uses the top row and each subsequent level uses an additional row
+If a zombie reaches the left side of the screen, you lose
+If you beat level 10, you win
 
-From the start screen, press START to move to the instructions.
-From the instructions screen, press START to begin the game
+CHEAT: Press A & B at the same time on the start screen to enable the cheat. With the cheat enabled, you can upgrade
+plants to the top tier without consuming any additional seeds (which allows them to shoot much faster).
+
+Use START to navigate from the splash screen to instructions
+Use START to navigate from instructions to game play
 While in game:
-    Press SELECT to move to the pause/store screen 
-    Press A to spawn a new plant
-        Use the arrow keys to move it around
-        Press A to place it (it won't fire until placed)
-        Press B to upgrade it (the more upgraded the plant, the less time it takes to fire)
-            You can tell what level the plant is based off the color
+    Press A to spawn a new plant (assuming you have at least 1 seed available)
+        Use arrows to move it around
+        Press A again to place it (it won't fire until it's been placed)
+        You can tell if it's been placed by artwork
+        Press B before placing it to upgrade it (this will consume more seeds)
+            There are only 3 levels
+            Levels are distinguished by color (for now)
+            Higher levels = less shooting cooldown time
+    Press SELECT to pause the game
 While paused:
-    Press SELECT to move to the splash screen
-    Press START to return to the game
-From the win/lose screen, press START to move to the splash screen
-
-The final game will have 10+ levels, but I currently only have the game playing through 3 levels
-Level 1 has 10 zombies (red boxes) come through the top row (every level allows the zombies to use an additional row).
-You lose by allowing a zombie to reach the house (the box on the left edge of the screen)
-
-The zombies are the red boxes and plants are the green boxes. Their art isn't done but the art for bullets and seeds is.
-Seeds are dropped when a zombie is killed but they don't have any meaning in this iteration because I haven't implemented the multiple level mechanic yet
+    Press START to resume
+    Press SELECT to start over

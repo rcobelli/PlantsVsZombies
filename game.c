@@ -10,6 +10,7 @@ PLANT plants[PLANTCOUNT];
 BULLET bullets[BULLETCOUNT];
 ZOMBIE enemies[ENEMYCOUNT];
 SEED seeds[SEEDCOUNT];
+
 int enemiesRemaining;
 int enemiesThisLevel;
 int enemySpawnCooldown;
@@ -22,6 +23,9 @@ int currentPlant;
 int spawnCoord;
 
 int currentLevel;
+
+int initialCountdown;
+int cheatEnabled;
 
 
 // Sprite Documentation -----------------------------------------------
@@ -51,13 +55,14 @@ void initGame() {
 
 	currentPlant = -1;
 	zombieReachedHouse = 0;
-
+	enemiesRemaining = 0;
+	enemiesThisLevel = 0;
+	enemySpawnCooldown = 0;
+	enemySpawnCountdown = 0;
 	currentLevel = 0;
-	nextLevel();
-
 	seedsCollection = 1;
-
 	spawnCoord = 20;
+	initialCountdown = 200;
 
 	// Setup level sprites
 	shadowOAM[101].attr0 = (SCREENHEIGHT - 18) | ATTR0_SQUARE | ATTR0_REGULAR;
@@ -117,11 +122,15 @@ void updateGame() {
 		updateSeed(i, &seeds[i]);
 	}
 
-	if (enemiesRemaining > 0 && enemySpawnCountdown <= 0) {
-		spawnZombie(currentLevel);
-		enemySpawnCountdown = enemySpawnCooldown;
+	if (initialCountdown > 0) {
+		initialCountdown--;
 	} else {
-		enemySpawnCountdown--;
+		if (enemiesRemaining > 0 && enemySpawnCountdown <= 0) {
+			spawnZombie(currentLevel);
+			enemySpawnCountdown = enemySpawnCooldown;
+		} else {
+			enemySpawnCountdown--;
+		}
 	}
 
 	// Update level sprite
@@ -179,6 +188,7 @@ void nextLevel() {
 	
 	enemiesRemaining = enemiesThisLevel;
 	enemySpawnCountdown = enemySpawnCooldown;
+	initialCountdown = 100;
 
 	collectSeeds();
 }
@@ -255,10 +265,11 @@ void spawnPlant() {
 
 				currentPlant = i;
 
-				// Break out of the loop
-				break;
+				return;
 			}
 		}
+		seedsCollection++;
+		playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 	} else {
    		playSoundB(error, ERRORLEN, ERRORFREQ, 0);
 	}
@@ -270,25 +281,29 @@ void lockPlant() {
 }
 
 void upgradePlant() {
-	if (plants[currentPlant].level == 0) {
-		// Upgrade to level 1
-		if (seedsCollection > 3) {
-			seedsCollection -= 3;
-			plants[currentPlant].level++;
-		} else {
-   			playSoundB(error, ERRORLEN, ERRORFREQ, 0);
-		}
-	} else if (plants[currentPlant].level == 1) {
-		// Upgrade to level 2
-		if (seedsCollection > 3) {
-			seedsCollection -= 3;
-			plants[currentPlant].level++;
-		} else {
-   			playSoundB(error, ERRORLEN, ERRORFREQ, 0);
-		}
+	if (cheatEnabled) {
+		plants[currentPlant].level = 2;
 	} else {
-		// Play error sound
-   		playSoundB(error, ERRORLEN, ERRORFREQ, 0);
+		if (plants[currentPlant].level == 0) {
+			// Upgrade to level 1
+			if (seedsCollection > 3) {
+				seedsCollection -= 3;
+				plants[currentPlant].level++;
+			} else {
+				playSoundB(error, ERRORLEN, ERRORFREQ, 0);
+			}
+		} else if (plants[currentPlant].level == 1) {
+			// Upgrade to level 2
+			if (seedsCollection > 3) {
+				seedsCollection -= 3;
+				plants[currentPlant].level++;
+			} else {
+				playSoundB(error, ERRORLEN, ERRORFREQ, 0);
+			}
+		} else {
+			// Play error sound
+			playSoundB(error, ERRORLEN, ERRORFREQ, 0);
+		}
 	}
 }
 
@@ -329,9 +344,9 @@ void updateBullet(int i, BULLET* b) {
 					b->active = 0;
 					enemies[i].active = 0;
 					enemiesRemaining--;
-					if (rand() % 2 == 0) {
+					// if (rand() % 2 == 0) {
 						dropSeed(b->col, b->row);
-					}
+					// }
 				}
 			}
 		}
@@ -497,7 +512,7 @@ void dropSeed(int x, int y) {
 	for (int i = 0; i < SEEDCOUNT; i++) {
 		if (!seeds[i].active) {
 			// Position the new bullet
-			seeds[i].row = y - 8;
+			seeds[i].row = y - 4;
 			seeds[i].col = x;
 
 			shadowOAM[76 + i].attr0 = seeds[i].row | ATTR0_REGULAR | ATTR0_SQUARE;

@@ -69,6 +69,10 @@ extern int currentPlant;
 
 extern int currentLevel;
 
+extern int initialCountdown;
+
+extern int cheatEnabled;
+
 // Prototypes
 void initGame();
 void drawGame();

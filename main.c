@@ -27,14 +27,11 @@ Finished:
   - Upgrading plants
   - Multiple levels
   - State machine
-  - Implement levels 3-10(+)
+  - Implement levels 1-10
   - Balance the game (actually make it fun)
   - Provide in-game instructions
   - Artwork
   - Sound
-
-Todo:
-  - Improve zombie sprite/animation
   - Add cheat
 
 Instructions:
@@ -43,6 +40,9 @@ The goal of the game is to place plants in the way of zombies to shoot them (as 
 Level 1 only uses the top row and each subsequent level uses an additional row
 If a zombie reaches the left side of the screen, you lose
 If you beat level 10, you win
+
+CHEAT: Press A & B at the same time on the start screen to enable the cheat. With the cheat enabled, you can upgrade
+plants to the top tier without consuming any additional seeds (which allows them to shoot much faster).
 
 Use START to navigate from the splash screen to instructions
 Use START to navigate from instructions to game play
@@ -181,9 +181,11 @@ void start() {
         srand(numGenSeed);
 
         goToInstructions();
+    } else if (BUTTON_PRESSED(BUTTON_B) && BUTTON_PRESSED(BUTTON_A)) {
+        cheatEnabled = 1;
     }
 
-    REG_BG0HOFF = (hOff++) * 0.5;
+    REG_BG1HOFF = (hOff++) * 0.5;
 }
 
 void goToInstructions() {
@@ -205,8 +207,9 @@ void instructions() {
     if (BUTTON_PRESSED(BUTTON_START)) {
         playSoundA(bgMusic, BGMUSICLEN, BGMUSICFREQ, 1);
         goToGame();
-        initGame();
     }
+
+    REG_BG1HOFF = 0;
 }
 
 // Sets up the game state
@@ -226,6 +229,8 @@ void goToGame() {
     REG_BG0CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(20) | BG_SIZE_SMALL;
 
     state = GAME;
+
+    initGame();
 }
 
 // Runs every frame of the game state
@@ -281,7 +286,7 @@ void game() {
         stopSound();
         goToWin();
     }
-    else if (enemiesRemaining == 0) {
+    else if (initialCountdown <= 0 && enemiesRemaining == 0) {
         nextLevel();
     }
     else if (zombieReachedHouse) {
