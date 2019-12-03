@@ -207,6 +207,7 @@ void instructions() {
     if (BUTTON_PRESSED(BUTTON_START)) {
         playSoundA(bgMusic, BGMUSICLEN, BGMUSICFREQ, 1);
         goToGame();
+        initGame();
     }
 
     REG_BG1HOFF = 0;
@@ -229,8 +230,6 @@ void goToGame() {
     REG_BG0CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(20) | BG_SIZE_SMALL;
 
     state = GAME;
-
-    initGame();
 }
 
 // Runs every frame of the game state
